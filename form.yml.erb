@@ -93,48 +93,12 @@ attributes:
       #    data-option-for-cluster-casper: false
       #    ]
       # <%- end %>
-  num_nodes:
-    label: "Specify N Nodes (-l select=N)"
-    widget: 'number_field'
-    min: 1
-    max: 1
-    value: 1 # Fixed — InferStudio runs as a single process on a single node
-    disabled: true
-  bc_num_slots:
-    widget: "number_field"
-    label: "Specify N CPUs per Node (-l ncpus=N)"
-    min: 1
-    max: 72
-    value: 2 # Default
-    disabled: true
-  threads:
-    label: "Specify Threads per Process (-l ompthreads=N)"
-    widget: "number_field"
-    min: 1
-    max: 1
-    value: 1 # Fixed — not an MPI/OpenMP application
-    disabled: true
-  mpiprocs:
-    label: "Specify MPI processes per Node (-l mpiprocs=N)"
-    widget: "number_field"
-    min: 1
-    max: 1
-    value: 1 # Fixed — not an MPI application
-    disabled: true
-  memory:
-    label: "Specify Memory per Node in GB (-l mem=N)"
-    widget: "number_field"
-    min: 1
-    max: 1494
-    value: 128 # Default
-    disabled: true
-  num_gpus:
-    label: "Specify X Number of GPUs / Node (-l ngpus=X)"
-    widget: 'number_field'
-    min: 0
-    max: 8
-    value: 1 # Default — InferStudio needs a GPU to run inference
-    disabled: true
+  num_nodes: 1
+  bc_num_slots: 2
+  threads: 1
+  mpiprocs: 1
+  memory: 128
+  num_gpus: 1
   gpu_type:
     label: "Select GPU Type, X (-l gpu_type=X)"
     widget: 'select'
