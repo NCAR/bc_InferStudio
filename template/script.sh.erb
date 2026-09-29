@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 echo "Starting InferStudio..."
 
+# When the job's wall time runs out (Unix seconds). InferStudio counts down
+# to it in the page header and warns before the job is killed.
+export INFERSTUDIO_JOB_END=$(( $(date +%s) + <%= bc_num_hours.to_i %> * 3600 ))
+
 #module restore
 module load ncarenv/25.10 cuda/12.9.0 conda
 
