@@ -1,7 +1,7 @@
 ---
 cluster:
   - "casper"
-  # - "derecho"  # disabled for now — L40 GPUs only exist on Casper
+  - "derecho"  # disabled for now — L40 GPUs only exist on Casper
 form:
   - resource
   - custom_queue
@@ -55,10 +55,10 @@ attributes:
           data-set-custom-queue: 'casper',
           data-hide-custom-queue: true,
           data-set-bc-num-hours: 1 ]
-      # - [ 'Derecho PBS batch', "derecho_batch",
-      #     data-exclusive-option-for-cluster-derecho: true,
-      #     data-set-custom-queue: 'main',
-      #     data-set-bc-num-hours: 1 ]
+      - [ 'Derecho PBS batch', "derecho_batch",
+          data-exclusive-option-for-cluster-derecho: true,
+          data-set-custom-queue: 'main',
+          data-set-bc-num-hours: 1 ]
   custom_queue:
     widget: 'select'
     label: "Queue or Reservation (-q)"
@@ -66,15 +66,15 @@ attributes:
       <%- CustomQueues.queues["cr"].each do |queue| %>
       - [ "<%= queue.strip %>", "<%= queue.strip %>",
           data-exclusive-option-for-cluster-casper: true ]
-    <%- end %>
+      <%- end %>
       # Derecho queues disabled for now — this app is Casper-only.
-      # <%- CustomQueues.queues["de"].each do |queue| %>
-      # - [ "<%= queue.strip %>", "<%= queue.strip %>",
-      #     data-exclusive-option-for-cluster-derecho: true ]
-      # <%- end %>
-      # - [ 'jhublogin', 'jhublogin',
-      #     data-exclusive-option-for-resource-jhublogin: true
-      #   ]
+       <%- CustomQueues.queues["de"].each do |queue| %>
+       - [ "<%= queue.strip %>", "<%= queue.strip %>",
+           data-exclusive-option-for-cluster-derecho: true ]
+       <%- end %>
+       #- [ 'jhublogin', 'jhublogin',
+       #    data-exclusive-option-for-resource-jhublogin: true
+       #  ]
   bc_account:
     label: "Project Account (-A)"
     widget: 'select'
