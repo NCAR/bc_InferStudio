@@ -68,11 +68,11 @@ attributes:
           data-exclusive-option-for-cluster-casper: true ]
       <%- end %>
       # Derecho queues disabled for now — this app is Casper-only.
-       <%- CustomQueues.queues["de"].each do |queue| %>
-       - [ "<%= queue.strip %>", "<%= queue.strip %>",
-           data-exclusive-option-for-cluster-derecho: true ]
-       <%- end %>
-       #- [ 'jhublogin', 'jhublogin',
+      <%- CustomQueues.queues["de"].each do |queue| %>
+      - [ "<%= queue.strip %>", "<%= queue.strip %>",
+          data-exclusive-option-for-cluster-derecho: true ]
+      <%- end %>
+      #- [ 'jhublogin', 'jhublogin',
        #    data-exclusive-option-for-resource-jhublogin: true
        #  ]
   bc_account:
