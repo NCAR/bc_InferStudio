@@ -10,9 +10,19 @@ module load ncarenv/25.10 cuda/12.9.0 conda
 
 CONDA_SETUP_FILE="${NCAR_JUPYTERHUB_PREFIX}/stable/etc/profile.d/conda.sh"
 [ -f ${CONDA_SETUP_FILE} ] && . ${CONDA_SETUP_FILE}
-conda activate /glade/work/pearse/conda-envs/creditJun3
+conda activate "<%= context.conda_env %>"
 
-cd /glade/work/pearse/InferStudio
+#cd /glade/work/pearse/ProductionInferStudio
+# The "Sandbox App" entry stages sessions under .../batch_connect/dev/...;
+# the production entry stages under .../batch_connect/sys/ (or usr/).
+SESSION_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+case "${SESSION_DIR}" in
+    */batch_connect/dev/*) APP_DIR=/glade/work/pearse/SandboxInferStudio ;;
+    *)                     APP_DIR=/glade/work/pearse/ProductionInferStudio ;;
+esac
+echo "Session dir: ${SESSION_DIR}"
+echo "Serving InferStudio from: ${APP_DIR}"
+cd "${APP_DIR}" || { echo "Cannot cd to ${APP_DIR}" >&2; exit 1; }
 
 set -x
 panel serve panel_app.py \
