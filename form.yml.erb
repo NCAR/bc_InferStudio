@@ -1,7 +1,9 @@
 ---
+# Sessions run on Casper only: they need no GPU, and InferStudio submits its
+# inference jobs to Casper or Derecho from there. (A CPU-only session on
+# Derecho would be charged for a whole node.)
 cluster:
   - "casper"
-  - "derecho"  # A100 GPUs only; L40s exist only on Casper
 form:
   - resource
   - custom_queue
@@ -11,8 +13,6 @@ form:
   - threads
   - mpiprocs
   - memory
-  - num_gpus
-  - gpu_type
   - bc_num_hours
   - conda_env
   - bc_email_on_started
@@ -21,7 +21,8 @@ attributes:
     label: 'Resource Selection'
     widget: 'select'
     help: |
-      Casper PBS batch allocates a dedicated L40 GPU node.
+      The session itself runs on CPUs only. Run Inference submits a
+      separate GPU job, to Casper or Derecho, charged to this account.
       New to InferStudio? See the
       [Quickstart](https://inferstudio.readthedocs.io/en/latest/getting-started/quickstart.html)
       or the [full documentation](https://inferstudio.readthedocs.io/).
@@ -40,11 +41,6 @@ attributes:
       #     data-set-mpi-procs: 1,
       #     data-hide-memory: true,
       #     data-set-memory: 10,
-      #     data-hide-enable-gpus: true,
-      #     data-set-enable-gpus: 0,
-      #     data-hide-num-gpus: true,
-      #     data-set-num-gpus: 0,
-      #     data-hide-gpu-type: true,
       #     data-hide-bc-num-hours: true,
       #     data-set-bc-num-hours: 720,
       #     data-max-bc-num-hours: 720,
@@ -55,10 +51,6 @@ attributes:
           data-set-custom-queue: 'casper',
           data-hide-custom-queue: true,
           data-set-bc-num-hours: 1 ]
-      - [ 'Derecho PBS batch', "derecho_batch",
-          data-exclusive-option-for-cluster-derecho: true,
-          data-set-custom-queue: 'main',
-          data-set-bc-num-hours: 1 ]
   custom_queue:
     widget: 'select'
     label: "Queue or Reservation (-q)"
@@ -66,11 +58,6 @@ attributes:
       <%- CustomQueues.queues["cr"].each do |queue| %>
       - [ "<%= queue.strip %>", "<%= queue.strip %>",
           data-exclusive-option-for-cluster-casper: true ]
-      <%- end %>
-      # Derecho queues
-      <%- CustomQueues.queues["de"].each do |queue| %>
-      - [ "<%= queue.strip %>", "<%= queue.strip %>",
-          data-exclusive-option-for-cluster-derecho: true ]
       <%- end %>
       #- [ 'jhublogin', 'jhublogin',
        #    data-exclusive-option-for-resource-jhublogin: true
@@ -80,45 +67,16 @@ attributes:
     widget: 'select'
     help: "Select the account to charge for this job."
     options:
-      # One option per account (duplicate values confuse the cluster
-      # show/hide logic); hide it only on the cluster it isn't valid for.
-      <%- cr_accounts = Array(CustomAccounts.accounts["cr"]).map(&:strip) %>
-      <%- de_accounts = Array(CustomAccounts.accounts["de"]).map(&:strip) %>
-      <%- (cr_accounts | de_accounts).each do |account| %>
-      - [ "<%= account %>", "<%= account %>"<%= ", data-option-for-cluster-derecho: false" unless de_accounts.include?(account) %><%= ", data-option-for-cluster-casper: false" unless cr_accounts.include?(account) %> ]
+      # The session runs on Casper, so only Casper accounts. InferStudio
+      # charges its inference jobs to the same account, on either system.
+      <%- Array(CustomAccounts.accounts["cr"]).map(&:strip).uniq.each do |account| %>
+      - [ "<%= account %>", "<%= account %>" ]
       <%- end %>
   num_nodes: 1
   bc_num_slots: 2
   threads: 1
   mpiprocs: 1
   memory: 128
-  num_gpus: 1
-  gpu_type:
-    label: "Select GPU Type, X (-l gpu_type=X)"
-    widget: 'select'
-    options:
-      # Restricted to L40 for now — InferStudio's model backends
-      # (earth2studio / MILES-CREDIT) are currently only validated on
-      # NVIDIA L40 GPUs on Casper.
-      - ["NVIDIA L40", "l40", data-option-for-cluster-derecho: false]
-      # --- other GPU types disabled for now, re-enable as needed ---
-      # - ["NVIDIA Compute Capability 7.0", "cc70"]
-      # - ["NVIDIA Compute Capability 8.0", "cc80"]
-      # - ["NVIDIA Compute Capability 9.0", "cc90"]
-      # - ["Any NVIDIA GPGPU", "nvgpu"]
-      # - ["NVIDIA V100 SXM 4-way", "v100_4way"]
-      # - ["NVIDIA V100 SXM 8-way", "v100_8way"]
-      - ["NVIDIA A100 PCIe 1-way", "a100_1way", data-option-for-cluster-derecho: false]
-      # Derecho's GPU nodes are 4-way A100 40GB; a100_1way exists only on Casper.
-      - ["NVIDIA A100 (Derecho)", "a100", data-option-for-cluster-casper: false]
-      # - ["NVIDIA A100 SXM 4-way", "a100_4way"]
-      # - ["NVIDIA A100 80GB 4-way", "a100_80gb"]
-      # - ["NVIDIA H100 SXM 4-way", "h100_4way"]
-      # - ["NVIDIA H100 80GB", "h100_80gb"]
-      # - ["Any AMD GPGPU", "amdgpu"]
-      # - ["AMD MI300a", "mi300a"]
-      # - ["Visualization - ANY Vis GPU", "vis"]
-      # - ["Visualization - NVIDIA GP100", "gp100"]
   bc_num_hours:
     label: "Wall Time in hours (24-hour max)"
     widget: 'number_field'
