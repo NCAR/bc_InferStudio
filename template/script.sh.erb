@@ -5,6 +5,11 @@ echo "Starting InferStudio..."
 # to it in the page header and warns before the job is killed.
 export INFERSTUDIO_JOB_END=$(( $(date +%s) + <%= context.bc_num_hours.to_i %> * 3600 ))
 
+# InferStudio runs inference in PBS jobs of its own, charged to the same
+# project as this session, in the same conda environment.
+export INFERSTUDIO_ACCOUNT="<%= context.bc_account %>"
+export INFERSTUDIO_CONDA_ENV="<%= context.conda_env %>"
+
 #module restore
 module load ncarenv/25.10 cuda/12.9.0 conda
 
@@ -17,9 +22,13 @@ conda activate "<%= context.conda_env %>"
 # the production entry stages under .../batch_connect/sys/ (or usr/).
 SESSION_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 case "${SESSION_DIR}" in
-    */batch_connect/dev/*) APP_DIR=/glade/work/pearse/SandboxInferStudio ;;
-    *)                     APP_DIR=/glade/work/pearse/ProductionInferStudio ;;
+    */batch_connect/dev/*) APP_DIR=/glade/work/pearse/SandboxInferStudio
+                           SESSION_TYPE=dev ;;
+    *)                     APP_DIR=/glade/work/pearse/ProductionInferStudio
+                           SESSION_TYPE=production ;;
 esac
+# Tags InferStudio's usage logs, so dev sessions can be left out.
+export INFERSTUDIO_SESSION_TYPE="${SESSION_TYPE}"
 echo "Session dir: ${SESSION_DIR}"
 echo "Serving InferStudio from: ${APP_DIR}"
 cd "${APP_DIR}" || { echo "Cannot cd to ${APP_DIR}" >&2; exit 1; }
